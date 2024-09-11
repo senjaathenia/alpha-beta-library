@@ -1,6 +1,6 @@
 # project-golang-crud
 
-##### The diagram 
+#### The diagram 
 ![clean_code_architecture](./clean-code-arch.jpg)
 
 More explanation about clean code architecture can read from this
@@ -9,14 +9,14 @@ medium's post :
 
 ## Deskripsi Proyek: Sistem Manajemen Perpustakaan
 
-#### Latar Belakang
+### Latar Belakang
 
 Anda ditugaskan untuk mengembangkan aplikasi manajemen perpustakaan menggunakan bahasa pemrograman Go. Aplikasi ini harus mengikuti prinsip-prinsip arsitektur bersih (clean architecture) dan memanfaatkan framework Echo untuk pengelolaan HTTP request. Data akan disimpan di database PostgreSQL dan diakses melalui GORM, sebuah Object-Relational Mapping (ORM) untuk Go.
 
-#### Tujuan
+### Tujuan
 Membangun aplikasi RESTful API untuk manajemen buku dalam sebuah perpustakaan yang meliputi operasi CRUD (Create, Read, Update, Delete) dengan menggunakan arsitektur bersih dan framework Echo.
 
-####  Fitur yang Diharapkan
+###  Fitur yang Diharapkan
 
 Manajemen Buku:
 
@@ -65,7 +65,7 @@ Dokumentasi API:
 * Deskripsi: Folder ini berisi file dokumentasi API dalam format Swagger/OpenAPI. Dokumen ini mendeskripsikan API dan endpoint yang tersedia untuk aplikasi.
 * File: swagger.yaml: Dokumentasi API menggunakan Swagger/OpenAPI.
 
-#### Instruksi Pengerjaan
+### Instruksi Pengerjaan
 1. Inisialisasi Proyek:
     * Buat folder dan file sesuai dengan struktur proyek di atas.
     * Implementasikan model dan interface di domains/models.go.
