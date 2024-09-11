@@ -34,10 +34,10 @@ Dokumentasi API:
 
 ### Struktur Proyek
 
-* conf/
-Deskripsi: Folder ini menyimpan file konfigurasi untuk aplikasi, seperti config.env, yang berisi variabel lingkungan seperti URL database.
-File:
-config.env: Berisi variabel lingkungan seperti seperti detail koneksi untuk menghubungkan ke database PostgreSQL.
+1. conf/
+* Deskripsi: Folder ini menyimpan file konfigurasi untuk aplikasi, seperti config.env, yang berisi variabel lingkungan seperti URL database.
+* File:
+  config.env: Berisi variabel lingkungan seperti seperti detail koneksi untuk menghubungkan ke database PostgreSQL.
 
 * domains/
 Deskripsi: Folder ini berisi definisi model atau struktur data yang digunakan dalam aplikasi. Model ini biasanya merepresentasikan entitas dari domain aplikasi dan juga interface untuk repository dan usecase.
