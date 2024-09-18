@@ -1,16 +1,18 @@
 package delivery
 
 import (
-	"project-golang-crud/domains"
 	"net/http"
+	"project-golang-crud/domains"
 	"strconv"
+
 	"github.com/labstack/echo/v4"
 )
+
 type AuthorHandler struct {
 	AuthorUsecase domains.AuthorUsecase
 }
 
-func NewAuthorHandler(e *echo.Echo, authorUsecase domains.AuthorUsecase)  {
+func NewAuthorHandler(e *echo.Echo, authorUsecase domains.AuthorUsecase) {
 	handler := &AuthorHandler{AuthorUsecase: authorUsecase}
 
 	e.POST("/authors", handler.Create)
@@ -46,8 +48,8 @@ func (h *AuthorHandler) GetByID(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
-	if err != nil {
-		return c.JSON(http.StatusOK, author)
+	if author == nil {
+		return c.JSON(http.StatusNotFound, map[string]string{"error": "Author not found"})
 	}
 	return c.JSON(http.StatusOK, author)
 }
@@ -57,7 +59,7 @@ func (h *AuthorHandler) Update(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid Id"})
 	}
-	
+
 	var author domains.Author
 	if err := c.Bind(&author); err != nil {
 		return c.JSON(http.StatusBadRequest, err)

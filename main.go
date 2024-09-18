@@ -36,17 +36,20 @@ func main() {
 	bookUsecase := usecase.NewBookUsecase(bookRepo) // Pastikan ini mengembalikan BooksUsecase
 	authorRepo := repository.NewAuthorRepository(db)
 	authorUsecase := usecase.NewAuthorUsecase(authorRepo)
+	publisherRepo := repository.NewPublisherRepository(db)
+	publisherUsecase := usecase.NewPublisherUsecase(publisherRepo)
 	// Setup handler untuk endpoint buku
 	delivery.NewBookHandler(e, bookUsecase) // Pastikan tipe bookUsecase sesuai
 	delivery.NewAuthorHandler(e, authorUsecase)
+	delivery.NewPublisherHandler(e, publisherUsecase)
 	// Menjalankan server di port 8080
-	e.Logger.Fatal(e.Start(":8080"))
+	e.Logger.Fatal(e.Start(":8081"))
 }
 
 // migrate menjalankan auto-migration untuk model Buku
 func migrate(db *gorm.DB) {
 	// Pastikan semua tabel sudah terbuat dengan model yang digunakan
-	err := db.AutoMigrate(&domains.Book{}, &domains.Author{})
+	err := db.AutoMigrate(&domains.Book{}, &domains.Author{}, &domains.Publisher{})
 	if err != nil {
 		log.Fatalf("Error in database migration: %v", err)
 	}
