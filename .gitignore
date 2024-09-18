@@ -1,2 +1,10 @@
-config.env
+/.idea
+/.vscode
+/.debug
+/conf
+/swagger
+/vendor
+/temp_folder
+swagger.zip
+/conf/config.env
 go.sum
