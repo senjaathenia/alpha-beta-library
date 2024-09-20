@@ -39,7 +39,7 @@ func main() {
 	// Setup handler untuk endpoint buku
 	delivery.NewBookHandler(e, bookUsecase) // Pastikan tipe bookUsecase sesuai
 	delivery.NewAuthorHandler(e, authorUsecase)
-	// Menjalankan server di port 8081
+	// Menjalankan server di port 8080
 	e.Logger.Fatal(e.Start(":8080"))
 }
 
