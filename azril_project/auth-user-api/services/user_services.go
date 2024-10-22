@@ -1,3 +1,5 @@
+//services/user_services.go
+
 package services
 
 import (
@@ -28,7 +30,7 @@ func NewUserService(repo repository.UserRepository) UserService {
 
 func (s *userService) Register(username, email, password1, password2 string) error {
     if password1 != password2 {
-        return errors.New("password tidak cocok")
+        return errors.New("password didn't match")
     }
 
     if err := utils.ValidatePassword(password1); err != nil {

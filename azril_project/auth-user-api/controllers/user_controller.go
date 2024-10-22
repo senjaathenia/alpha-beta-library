@@ -5,6 +5,7 @@ package controllers
 import (
     "net/http"
     "auth-user-api/services"
+    "auth-user-api/domains"
 
     "github.com/labstack/echo/v4"
 )
@@ -17,7 +18,7 @@ func NewUserController(service services.UserService) *UserController {
     return &UserController{service}
 }
 
-// RegisterUser godoc
+// Register User godoc
 func (c *UserController) RegisterUser(ctx echo.Context) error {
     type RegisterRequest struct {
         Username  string `json:"username" validate:"required"`
@@ -28,63 +29,105 @@ func (c *UserController) RegisterUser(ctx echo.Context) error {
 
     var req RegisterRequest
     if err := ctx.Bind(&req); err != nil {
-        return ctx.JSON(http.StatusBadRequest, echo.Map{"error": "Failed processing input, try again"})
+        response := domains.BaseResponse{
+            Code:    "400",
+            Message: "Failed processing input, try again. Error: " + err.Error(),
+            Error:   "Binding error: " + err.Error(),
+        }
+        return ctx.JSON(http.StatusBadRequest, response)
     }
 
-    // Validasi input
-    if err := ctx.Validate(req); err != nil {
-        if _, ok := err.(*echo.HTTPError); ok {
-            if req.Username == "" {
-                return ctx.JSON(http.StatusBadRequest, echo.Map{"error": "Username cannot be empty"})
-            }
-            if req.Email == "" {
-                return ctx.JSON(http.StatusBadRequest, echo.Map{"error": "Email cannot be empty"})
-            }
-            if req.Password1 == "" {
-                return ctx.JSON(http.StatusBadRequest, echo.Map{"error": "Password 1 cannot be empty"})
-            }
-            if req.Password2 == "" {
-                return ctx.JSON(http.StatusBadRequest, echo.Map{"error": "Password 2 cannot be empty"})
-            }
+    if req.Username == "" {
+        response := domains.BaseResponse{
+            Code:    "400",
+            Message: "Username cannot be empty. Field: username",
+            Error:   "Validation error",
         }
-        return ctx.JSON(http.StatusBadRequest, echo.Map{"error": err.Error()})
+        return ctx.JSON(http.StatusBadRequest, response)
+    }
+
+    if req.Email == "" {
+        response := domains.BaseResponse{
+            Code:    "400",
+            Message: "Email cannot be empty. Field: email",
+            Error:   "Validation error",
+        }
+        return ctx.JSON(http.StatusBadRequest, response)
+    }
+
+    if req.Password1 == "" {
+        response := domains.BaseResponse{
+            Code:    "400",
+            Message: "Password 1 cannot be empty. Field: password_1",
+            Error:   "Validation error",
+        }
+        return ctx.JSON(http.StatusBadRequest, response)
+    }
+
+    if req.Password2 == "" {
+        response := domains.BaseResponse{
+            Code:    "400",
+            Message: "Password 2 cannot be empty. Field: password_2",
+            Error:   "Validation error",
+        }
+        return ctx.JSON(http.StatusBadRequest, response)
+    }
+
+    if err := ctx.Validate(req); err != nil {
+        response := domains.BaseResponse{
+            Code:    "400",
+            Message: "Validation error. Field: " + err.Error(),
+            Error:   "Validation error: " + err.Error(),
+        }
+        return ctx.JSON(http.StatusBadRequest, response)
     }
 
     if err := c.service.Register(req.Username, req.Email, req.Password1, req.Password2); err != nil {
-        return ctx.JSON(http.StatusBadRequest, echo.Map{"error": err.Error()})
+        response := domains.BaseResponse{
+            Code:    "400",
+            Message: "Registration failed. Error: " + err.Error(),
+            Error:   "Service error: " + err.Error(),
+        }
+        return ctx.JSON(http.StatusBadRequest, response)
     }
 
-    // Mengembalikan respon sukses dengan format yang diinginkan
-    response := echo.Map{
-        "message": "User successfully registered.",
-        "user": echo.Map{
-            "username":   req.Username,
-            "email":      req.Email,
-            "password_1": req.Password1,
-            "password_2": req.Password2,
-        },
-        "code": "200",
+    userResponse := domains.RegisterResponse{
+        Username:  req.Username,
+        Email:     req.Email,
+        Password1: req.Password1,
+        Password2: req.Password2,
     }
 
+    response := domains.BaseResponse{
+        Code:      "200",
+        Message:   "User successfully registered",
+        Data:      userResponse,
+        Parameter: "username", 
+    }    
     return ctx.JSON(http.StatusOK, response)
 }
 
-// GetAllUsers godoc
+// Get All Users godoc
 func (c *UserController) GetAllUsers(ctx echo.Context) error {
     users, err := c.service.GetAllUsers()
     if err != nil {
-        return ctx.JSON(http.StatusInternalServerError, echo.Map{"error": "Failed to retrieve users"})
+        response := domains.BaseResponse{
+            Code:    "500",
+            Message: "Failed to retrieve users. Error: " + err.Error(),
+            Error:   "Service error: " + err.Error(),
+        }
+        return ctx.JSON(http.StatusInternalServerError, response)
     }
 
-    // Jika tidak ada error, kembalikan semua data user dalam bentuk JSON
-    return ctx.JSON(http.StatusOK, echo.Map{
-        "message": "Users retrieved successfully",
-        "users":   users,
-        "code": "200",
-    })
+    response := domains.BaseResponse{
+        Code:    "200",
+        Message: "Users retrieved successfully",
+        Data:    users,
+    }
+    return ctx.JSON(http.StatusOK, response)
 }
 
-// UpdateUser mengupdate informasi pengguna
+// Update User godoc
 func (c *UserController) UpdateUser(ctx echo.Context) error {
     type UpdateRequest struct {
         Username  string `json:"username" validate:"required"`
@@ -93,51 +136,63 @@ func (c *UserController) UpdateUser(ctx echo.Context) error {
         Password2 string `json:"password_2"`
     }
 
-    // Get the user ID from the URL parameter
     userID := ctx.Param("id")
     if userID == "" {
-        return ctx.JSON(http.StatusBadRequest, echo.Map{"error": "User ID is required"})
+        response := domains.BaseResponse{
+            Code:    "400",
+            Message: "User ID is required. Field: id",
+            Error:   "Validation error",
+        }
+        return ctx.JSON(http.StatusBadRequest, response)
     }
 
-    // Check if the user exists
     existingUser, err := c.service.GetUserByID(userID)
     if err != nil {
-        return ctx.JSON(http.StatusNotFound, echo.Map{
-            "error": "User not found",
-            "code": "404",
-        })
+        response := domains.BaseResponse{
+            Code:    "404",
+            Message: "User not found. UserID: " + userID,
+            Error:   "User retrieval error: " + err.Error(),
+        }
+        return ctx.JSON(http.StatusNotFound, response)
     }
 
     var req UpdateRequest
     if err := ctx.Bind(&req); err != nil {
-        return ctx.JSON(http.StatusBadRequest, echo.Map{"error": "Failed processing input, try again"})
+        response := domains.BaseResponse{
+            Code:    "400",
+            Message: "Failed processing input. Error: " + err.Error(),
+            Error:   "Binding error: " + err.Error(),
+        }
+        return ctx.JSON(http.StatusBadRequest, response)
     }
 
-    // Validasi input
-    if err := ctx.Validate(req); err != nil {
-        return ctx.JSON(http.StatusBadRequest, echo.Map{"error": err.Error()})
-    }
-
-    // Update user di database
     err = c.service.Update(userID, req.Username, req.Email, req.Password1, req.Password2)
     if err != nil {
-        return ctx.JSON(http.StatusBadRequest, echo.Map{"error": err.Error()})
+        response := domains.BaseResponse{
+            Code:    "400",
+            Message: "Failed to update user. Error: " + err.Error(),
+            Error:   "Service error: " + err.Error(),
+        }
+        return ctx.JSON(http.StatusBadRequest, response)
     }
 
-    // Mengembalikan respons dengan format yang diminta
-    return ctx.JSON(http.StatusOK, echo.Map{
-        "message": "User successfully updated.",
-        "user": echo.Map{
-            "user_id":   existingUser.ID,
-            "username":  req.Username,
-            "email":     req.Email,
-            "password":  existingUser.Password, // diasumsikan password sudah di-hash di dalam database
-        },
-        "code": "200",
-    })
+    userResponse := domains.UserResponse{
+        UserID:   existingUser.ID,
+        Username: req.Username,
+        Email:    req.Email,
+        Password: existingUser.Password,
+    }
+
+    response := domains.BaseResponse{
+        Code:      "200",
+        Message:   "User successfully updated. UserID: " + userID,
+        Data:      userResponse,
+        Parameter: "username", 
+    }    
+    return ctx.JSON(http.StatusOK, response)
 }
 
-// DeleteUser godoc
+// Delete User godoc
 func (c *UserController) DeleteUser(ctx echo.Context) error {
     type DeleteRequest struct {
         UserID string `json:"user_id" validate:"required"`
@@ -145,56 +200,60 @@ func (c *UserController) DeleteUser(ctx echo.Context) error {
 
     var req DeleteRequest
     if err := ctx.Bind(&req); err != nil {
-        return ctx.JSON(http.StatusBadRequest, echo.Map{
-            "message":         "Delete failed",
-            "error":           err.Error(),
-            "code": "400",
-        })
+        response := domains.BaseResponse{
+            Code:    "400",
+            Message: "Delete failed. Error: " + err.Error(),
+            Error:   "Binding error: " + err.Error(),
+        }
+        return ctx.JSON(http.StatusBadRequest, response)
     }
 
     if err := ctx.Validate(req); err != nil {
-        return ctx.JSON(http.StatusBadRequest, echo.Map{
-            "message":         "Delete failed",
-            "error":           err.Error(),
-            "code": "400",
-        })
+        response := domains.BaseResponse{
+            Code:    "400",
+            Message: "Delete failed. Validation error: " + err.Error(),
+            Error:   "Validation error: " + err.Error(),
+        }
+        return ctx.JSON(http.StatusBadRequest, response)
     }
 
-    // Check if the user exists and if the user has already been deleted
     user, err := c.service.GetUserByID(req.UserID)
     if err != nil {
-        return ctx.JSON(http.StatusNotFound, echo.Map{
-            "message":         "Delete failed",
-            "error":           echo.Map{"error": "User not found"},
-            "code": "404",
-        })
+        response := domains.BaseResponse{
+            Code:    "404",
+            Message: "User not found. UserID: " + req.UserID,
+            Error:   "User retrieval error: " + err.Error(),
+        }
+        return ctx.JSON(http.StatusNotFound, response)
     }
 
-    // Cek apakah user sudah dihapus sebelumnya
     if user.DeletedAt.Valid {
-        return ctx.JSON(http.StatusNotFound, echo.Map{
-            "message":         "Delete failed",
-            "error":           echo.Map{"error": "User not found"},
-            "code": "404",
-        })
+        response := domains.BaseResponse{
+            Code:    "404",
+            Message: "User not found. UserID: " + req.UserID,
+        }
+        return ctx.JSON(http.StatusNotFound, response)
     }
 
-    // Delete the user
     if err := c.service.Delete(req.UserID); err != nil {
-        return ctx.JSON(http.StatusBadRequest, echo.Map{
-            "message":         "Delete failed",
-            "error":           err.Error(),
-            "code": "400",
-        })
+        response := domains.BaseResponse{
+            Code:    "400",
+            Message: "Failed to delete user. UserID: " + req.UserID + ", Error: " + err.Error(),
+            Error:   "Service error: " + err.Error(),
+        }
+        return ctx.JSON(http.StatusBadRequest, response)
     }
 
-    return ctx.JSON(http.StatusOK, echo.Map{
-        "message":         "User deleted successfully",
-        "code": "200",
-    })
+    response := domains.BaseResponse{
+        Code:      "200",
+        Message:   "User deleted successfully. UserID: " + req.UserID,
+        Data:      domains.DeleteResponse{UserID: req.UserID},
+        Parameter: "user_id", 
+    }    
+    return ctx.JSON(http.StatusOK, response)
 }
 
-// LoginUser godoc
+// Login User godoc
 func (c *UserController) LoginUser(ctx echo.Context) error {
     type LoginRequest struct {
         Username string `json:"username" validate:"required"`
@@ -203,40 +262,44 @@ func (c *UserController) LoginUser(ctx echo.Context) error {
 
     var req LoginRequest
     if err := ctx.Bind(&req); err != nil {
-        return ctx.JSON(http.StatusBadRequest, echo.Map{
-            "message":         "Authenticate failed",
-            "error":           err.Error(),
-            "code": "400",
-        })
+        response := domains.BaseResponse{
+            Code:    "400",
+            Message: "Authentication failed. Error: " + err.Error(),
+            Error:   "Binding error: " + err.Error(),
+        }
+        return ctx.JSON(http.StatusBadRequest, response)
     }
 
     if err := ctx.Validate(req); err != nil {
-        return ctx.JSON(http.StatusBadRequest, echo.Map{
-            "message":         "Authenticate failed",
-            "error":           err.Error(),
-            "code": "400",
-        })
+        response := domains.BaseResponse{
+            Code:    "400",
+            Message: "Validation error. Field: " + err.Error(),
+            Error:   "Validation error: " + err.Error(),
+        }
+        return ctx.JSON(http.StatusBadRequest, response)
     }
 
-    // Authenticate user
     err := c.service.Authenticate(req.Username, req.Password)
     if err != nil {
         if err.Error() == "user not found" {
-            return ctx.JSON(http.StatusNotFound, echo.Map{
-                "message":         "Authentication failed",
-                "errortype":           echo.Map{"error-type": "User not found"},
-                "code": "404",
-            })
+            response := domains.BaseResponse{
+                Code:    "404",
+                Message: "User not found. Username: " + req.Username,
+            }
+            return ctx.JSON(http.StatusNotFound, response)
         }
-        return ctx.JSON(http.StatusUnauthorized, echo.Map{
-            "message":         "Authentication failed",
-            "error":           echo.Map{"error-type": "Invalid Username or Password"},
-            "code": "401",
-        })
+        response := domains.BaseResponse{
+            Code:    "401",
+            Message: "Invalid username or password. Username: " + req.Username,
+            Error:   "Unauthorized",
+        }
+        return ctx.JSON(http.StatusUnauthorized, response)
     }
 
-    return ctx.JSON(http.StatusOK, echo.Map{
-        "message":         "Authentication success",
-        "code": "200",
-    })
+    response := domains.BaseResponse{
+        Code:      "200",
+        Message:   "Authentication success. Username: " + req.Username,
+        Parameter: "authentication",
+    }    
+    return ctx.JSON(http.StatusOK, response)
 }
