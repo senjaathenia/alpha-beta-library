@@ -31,7 +31,7 @@ func main() {
 	userUsecase := usecase.NewUserUsecase(userRepo)
 	delivery.NewUserHandler(e,userUsecase)
 
-	e.Logger.Fatal(e.Start(":8081"))
+	e.Logger.Fatal(e.Start(":8082"))
 }
 
 func migrate(db *gorm.DB)  {
