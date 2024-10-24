@@ -8,9 +8,10 @@ import (
     "auth-user-api/services"
     "auth-user-api/models"
     "auth-user-api/utils"
+    "auth-user-api/middleware"  // Tambahkan ini
 
     "github.com/labstack/echo/v4"
-    "github.com/labstack/echo/v4/middleware"
+    echoMiddleware "github.com/labstack/echo/v4/middleware"
     "gorm.io/driver/postgres"
     "gorm.io/gorm"
 )
@@ -43,18 +44,23 @@ func main() {
     e := echo.New()
 
     // Middleware
-    e.Use(middleware.Logger())
-    e.Use(middleware.Recover())
+    e.Use(echoMiddleware.Logger())
+    e.Use(echoMiddleware.Recover())
 
     // Validator
     e.Validator = utils.NewValidator()
 
     // Routes
     e.POST("/register", userController.RegisterUser)
-    e.PUT("/update/:id", userController.UpdateUser) // Update route to accept `id` as a parameter
-    e.DELETE("/delete", userController.DeleteUser)
     e.POST("/login", userController.LoginUser)
     e.GET("/users", userController.GetAllUsers)
+    e.PUT("/update/:id", userController.UpdateUser)
+    e.DELETE("/delete", userController.DeleteUser)
+    
+    jwtMiddleware := middleware.NewJWTMiddleware(userService)
+
+    // Rute dengan middleware JWT
+    e.GET("/protected/hello", userController.HelloProtected, jwtMiddleware.JWTMiddleware)
 
     // Start Server
     port := "8080"

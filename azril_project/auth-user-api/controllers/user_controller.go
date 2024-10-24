@@ -4,9 +4,10 @@ package controllers
 
 import (
     "net/http"
+    "time"
+    "github.com/golang-jwt/jwt/v4"
     "auth-user-api/services"
     "auth-user-api/domains"
-
     "github.com/labstack/echo/v4"
 )
 
@@ -253,7 +254,14 @@ func (c *UserController) DeleteUser(ctx echo.Context) error {
     return ctx.JSON(http.StatusOK, response)
 }
 
-// Login User godoc
+var jwtKey = []byte("my_secret_key")  // Pastikan menggunakan secret key yang sama
+
+type JWTClaims struct {
+    Username string `json:"username"`
+    jwt.RegisteredClaims
+}
+
+// Login User
 func (c *UserController) LoginUser(ctx echo.Context) error {
     type LoginRequest struct {
         Username string `json:"username" validate:"required"`
@@ -264,8 +272,8 @@ func (c *UserController) LoginUser(ctx echo.Context) error {
     if err := ctx.Bind(&req); err != nil {
         response := domains.BaseResponse{
             Code:    "400",
-            Message: "Authentication failed. Error: " + err.Error(),
-            Error:   "Binding error: " + err.Error(),
+            Message: "Invalid input",
+            Error:  err.Error(),
         }
         return ctx.JSON(http.StatusBadRequest, response)
     }
@@ -273,33 +281,87 @@ func (c *UserController) LoginUser(ctx echo.Context) error {
     if err := ctx.Validate(req); err != nil {
         response := domains.BaseResponse{
             Code:    "400",
-            Message: "Validation error. Field: " + err.Error(),
-            Error:   "Validation error: " + err.Error(),
+            Message: "Validation error",
+            Error:  err.Error(),
         }
         return ctx.JSON(http.StatusBadRequest, response)
     }
 
+    // Authenticate the user
     err := c.service.Authenticate(req.Username, req.Password)
     if err != nil {
         if err.Error() == "user not found" {
             response := domains.BaseResponse{
                 Code:    "404",
-                Message: "User not found. Username: " + req.Username,
+                Message: "User not found.",
+                Error:   "UserNotFoundError",
             }
             return ctx.JSON(http.StatusNotFound, response)
+        } else if err.Error() == "invalid username or password" {
+            response := domains.BaseResponse{
+                Code:    "401",
+                Message: "Invalid username or password",
+                Error:   "AuthenticationError",
+            }
+            return ctx.JSON(http.StatusUnauthorized, response)
         }
+    
         response := domains.BaseResponse{
-            Code:    "401",
-            Message: "Invalid username or password. Username: " + req.Username,
-            Error:   "Unauthorized",
+            Code:    "500",
+            Message: "Internal server error",
+            Error:   err.Error(),
+        }
+        return ctx.JSON(http.StatusInternalServerError, response)
+    }    
+
+    // Membuat token JWT dengan durasi 24 jam
+    expirationTime := time.Now().Add(24 * time.Hour)
+    claims := &JWTClaims{
+        Username: req.Username,
+        RegisteredClaims: jwt.RegisteredClaims{
+            ExpiresAt: jwt.NewNumericDate(expirationTime),
+        },
+    }
+
+    token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+    tokenString, err := token.SignedString(jwtKey)
+    if err != nil {
+        response := domains.BaseResponse{
+            Code:    "500",
+            Message: "Failed to generate token",
+            Error:  err.Error(),
+        }
+        return ctx.JSON(http.StatusInternalServerError, response)
+    }
+
+    response := domains.BaseResponse{
+        Code:    "200",
+        Message: "Successful login",
+        Data: map[string]interface{}{
+            "token": tokenString,
+        },
+        Error: "",
+    }
+    
+    // Panggil helper function untuk memformat error jika kosong
+    response.FormatError()
+    
+    return ctx.JSON(http.StatusOK, response)
+}
+
+// Route yang diproteksi
+func (c *UserController) HelloProtected(ctx echo.Context) error {
+    username := ctx.Get("username")
+    if username == nil {
+        response := map[string]string{
+            "Message": "Unauthorized access. Missing or invalid token.",
         }
         return ctx.JSON(http.StatusUnauthorized, response)
     }
 
-    response := domains.BaseResponse{
-        Code:      "200",
-        Message:   "Authentication success. Username: " + req.Username,
-        Parameter: "authentication",
-    }    
+    response := map[string]string{
+        "Message": "Hello, you have accessed a protected route!",
+    }
+
     return ctx.JSON(http.StatusOK, response)
 }
