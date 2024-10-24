@@ -1,81 +1,67 @@
-# Library Management Project
+# Step 3 - Build Book Quantity Tracker
 
-## *What is this?*
+## Studi Kasus
 
-Di project kali ini, kita akan membangun sebuah project aplikasi yang akan digunakan untuk mengatur daftar buku perpustakaan menggunakan Go Programming Language.
+Cindy merupakan seorang pustakawan di Perpustakaan Alpha Beta. Dalam menjalankan kegiatan sehari-harinya, Cindy biasa melakukan kegiatannya secara manual, misal untuk mencatat peminjam buku, melacak jumlah buku tersedia setiap saat, dan mengatur daftar koleksi buku yag tersedia di perpustakaan tersebut.
 
-## *Any details*
+Di perpustakaan tersebut, masing-masing anggota diharuskan untuk mendaftar keanggotaan di perpustakaan tersebut apabila ingin meminjam koleksi buku yang ada. Namun karena semuanya masih manual, orang-orang yang ingin mendaftar masih harus antri untuk daftar ke Cindy, dan identitas anggota perpustakaan masih menggunakan sebuah kartu anggota. Terlebih Cindy harus mencatat peminjam dalam buku catatan peminjam buku yang mana kegiatan tersebut melelahkan dan bila perpustakaan sedang ramai, bisa jadi Cindy bisa melewatkan beberapa peminjam karena terlalu banyaknya orang yang antri meminjam.
 
-1. Aplikasi dibangun dengan menggunakan Go Programming Language.
+Maka dari itu, anda sebagai seorang konsultan IT dan seorang developer datang kepada Cindy untuk membantu Cindy melakukan digitalisasi Perpustakaan Alpha Beta. Ketika dilakukan wawancara terhadap Cindy, terdapat beberapa cerita yang diberikan oleh Cindy terkait keperluan digitalisasinya:
 
-2. Aplikasi dibuat secara *full stack* (*Front End* & *Back end* digabung menjadi satu).
+1. Koleksi buku yang ada di perpustkaan biasanya memiliki data-data sebagai berikut:
+    1. ID Buku
+    2. Judul Buku
+    3. Pengarang Buku
+    4. Penerbit Buku
+    5. Ringkasan Buku
+    6. Stok Buku
+    7. Stok Maksimal Buku
 
-3. *Source code* aplikasi di push di dalam folder ini, dengan cara membuat folder baru untuk masing-masing *mentee* dan *push source code*-nya di sana.
+2. Koleksi buku di perpustakaan bisa dilacak oleh Cindy, selain itu Cindy dapat melakukan penambahan koleksi buku, penghapusan koleksi buku, atau melakukan pembaruan terhadap informasi koleksi buku.
 
-4. Pengetahuan tambahan yang perlu diasah:
-   1. HTML
-   2. CSS
-   3. JavaScript (ES2015)
-   4. RDBMS (disarankan PostgreSQL)
-   5. *Bonus tambahan*: Docker
+3. Anggota yang ingin mendaftar keanggotaan di perpustakaan secara digital perlu memberikan informasi sebagai berikut:
+   1. User Name.
+   2. Password.
+   3. Email.
 
-5. Library yang diperbolehkan untuk digunakan:
-   1. Sebuah *web framework*. (Echo Web Framework)
-   2. ORM. Gunakan **GORM V2**.
-   3. JSONIter untuk marshal & unmarshal JSON.
-   4. [Swag](https://github.com/swaggo/swag) (Swagger API Documentation).
-   5. Any of Go built in library.
-   6. [Testify](https://github.com/stretchr/testify).
-   7. Library tambahan di luar list ini yang ingin digunakan bisa ditanyakan terlebih dahulu.
+    Dan apabila user ingin melakukan login keanggotaannya untuk meminjam, anggota tersebut perlu login dengan data-data sebagai berikut:
+    1. User Name.
+    2. Password.
 
-6. Library yang tidak diperbolehkan untuk digunakan:
-   1. jQuery.
+4. Ketika seorang anggota perpustakaan meminjam buku, biasanya anggota tersebut membawa bukunya ke Cindy, lalu Cindy akan memutuskan apakah buku tersebut boleh dipinjam atau tidak. Jika tidak boleh dipinjam karena alasan tertentu, Cindy akan mengarahkan anggota tersebut untuk meminjam buku yang lain beserta memberi tahu alasannya. Namun bila buku tersebut boleh dipinjam, Cindy akan mencatat kegiatan peminjaman tersebut dengan mencatat beberapa data sebagai berikut:
+   1. ID buku yang dipinjam
+   2. ID anggota yang meminjam.
+   3. Waktu dan tanggal peminjaman.
+   4. Tanggal tenggat buku harus dikembalikan.
+   5. Status buku sudah dikembalikan atau belum.
+   6. Tanggal buku dikembalikan.
 
-7. Struktur folder dibebaskan ke *mentee*, namun sangat disarankan untuk mengikuti kaidah [Go Standard Project Layout](https://github.com/golang-standards/project-layout).
+5. Ketika ada permintaan peminjaman, Cindy perlu melakukan persetujuan apakah buku tersebut boleh dipinjam atau tidak. Sehingga semua permintaan peminjaman buku harus dicatat pada suatu daftar catatan tersebut agar Cindy bisa melakukan crosscek apakah anggota tersebut benar-benar ingin meminjam atau tidak sebelum Cindy memberikan persetujuan. Cindy menginginkan catatan tersebut memiliki data sebagai berikut:
+    1. ID buku yang ingin dipinjam.
+    2. ID anggota yang ingin meminjam.
+    3. Waktu dan tanggal permintaan peminjaman.
+    4. Status permintaan diterima atau tidak.
+    5. Alasan apabila permintaan ditolak.
 
-8. Arsitektur kode dibebaskan ke *mentee*, namun sangat disarankan untuk mengikuti kaidah [Go Clean Architecture](https://github.com/bxcodec/go-clean-arch).
+    Dengan catatan tersebut, Cindy bisa mengetahui dan melacak kapan buku ini ingin dipinjam dan misalnya ditanya kenapa buku ini tidak bisa dipinjam pada waktu tertentu, anggota perpustakaan bisa meninjau alasannya di lain waktu.
 
-## Common Details
+6. Alur peminjaman buku di Perpustakaan Alpha Beta ketika dilakukan digitalisasi menurut Cindy adalah sebagai berikut:
+   1. Anggota melakukan login ke website Perpustakaan Alpha Beta.
+   2. Anggota melihat daftar koleksi buku yang tersedia di perpustakaan.
+   3. Anggota melakukan permintaan peminjaman buku selama persediaan buku masih ada, yang menyebabkan permintaan peminjamannya tercatat di catatan permintaan peminjaman buku
+   4. Anggota tersebut menuju Cindy dan memberi tahu user name keanggotaannya kepada Cindy dan judul buku yang ingin dipinjam. Kemudian Cindy melakukan crosscek ke catatan permintaan peminjaman buku. Apabila tidak ditemukan, Cindy tidak melanjutkan proses peminjaman buku, namun bila ditemukan, Cindy akan memutuskan apakah peminjaman tersebut disetujui atau tidak.
+   5. Apabila disetujui, Cindy akan melakukan persetujuan, yang menyebabkan data "status permintaan diterima" di catatan permintaan peminjaman buku berubah menjadi DISETUJUI, lalu data peminjaman buku yang baru tersebut akan tercatat di catatan peminjaman buku dengan waktu tenggat yang ditentukan oleh Cindy, biasanya 3 hari. Kemudian data stok buku akan diperbarui dan Cindy memberikan bukunya untuk dipinjam oleh anggota yang meminjam.
+   6. Apabila tidak disetujui, Cindy akan menolak permintaan tersebut, yang menyebabkan data "status permintaan diterima" di catatan permintaan peminjaman buku berubah menjadi DITOLAK, kemudian Cindy akan mengisi alasan kenapa permintaan tersebut ditolak.
 
-### API Details
+7. Alur pengembalian buku menurut Cindy dapat dilakukan sebagai berikut:
+   1. Anggota menemui Cindy untuk mengembalikan buku.
+   2. Anggota memberikan buku yang dipinjam dan memberitahukan user name-nya kepada Cindy.
+   3. Cindy melakukan pengecekan di catatan peminjaman buku, lalu melakukan perubahan data bahwa buku sudah dikembalikan.
+   4. Ketika buku sudah dikembalikan, sistem akan mengeluarkan denda yang harus dibayar oleh peminjam apabila terdapat perbedaan waktu antara "waktu buku harus dikembalikan" dan "waktu pengembalian buku dilakukan" sebanyak (n x Rp. 5000) apabila memang pengembaliannya telat. Waktu telat dihitung apabila sudah ganti hari dari "waktu buku harus dikembalikan".
+   5. Ketika buku sudah dikembalikan, sistem akan memperbarui stok buku.
 
-1. API dibangun dengan kaidah REST API.
+## Tugas
 
-2. Response dari sisi API seminimalnya memiliki data *field* sebagai berikut:
+Berdasarkan studi kasus tersebut, buatlah interface-interface yang diperlukan untuk menjalankan semua bisnis proses tersebut.
 
-    ```json
-    {
-        "message": "string",
-        "data": "object, nullable",
-        "errors": "object, nullable",
-        "code": "int"
-    }
-    ```
-
-3. *message* berisikan pesan hasil proses dari aplikasi bagian *back end*, apakah proses yang dilakukan berhasil, gagal, dan sebagainya.
-
-4. *data* berisikan data hasil proses dari aplikasi bagian *back end*. Diisi `null` bila tidak ada data-nya.
-
-5. *errors* berisikan satu atau lebih `error` yang terjadi pada saat aplikasi bagian *back end* melakukan suatu proses. Diisi `null` bila tidak ada `error`-nya.
-
-6. *code* berisikan http status code hasil dari status code proses yang didapatkan dari aplikasi bagian *back end*.
-
-7. Semua kalimat di dalam respon API harus ditulis dalam bahasa inggris.
-
-### Front End Details
-
-1. Bagian *Front end* harus memanfaatkan Go Template.
-
-2. Kode JavaScript harus *full native*, tidak boleh menggunakan bantuan jQuery.
-
-3. *Front end* dibangun dalam Bahasa Indonesia formal.
-
-### Code Development Details
-
-1. Setiap code yang di push harus lolos *linter*. Gunakan [golangci-lint](https://golangci-lint.run/).
-
-2. Setiap fitur harus dikerjakan dalam *branch* yang berbeda. *Checkout* dari latest *main*.
-
-3. Semua kode yang akan di push harus dibuat PR terlebih dahulu.
-
-4. Semua commit harus mengikuti kaidah [Conventional Commits](https://www.conventionalcommits.org/id/v1.0.0/).
+Apabila terdapat hal yang kurang jelas, dapat langsung ditanyakan ke mentornya ya
