@@ -17,6 +17,12 @@ func NewUserUsecase(repo domains.UserRepository) domains.UserUsecase {
 	return &userUsecase{Repo: repo}
 }
 
+// userUsecase.go
+func (u *userUsecase) GetAll() ([]domains.User, error) {
+	return u.Repo.GetAll() // Memanggil repository untuk mendapatkan pengguna yang aktif
+}
+
+
 func (u *userUsecase) Register(username, email, password string) (*domains.User, error) {
 	var validationErrors []domains.ErrorDetail
 

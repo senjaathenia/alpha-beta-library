@@ -15,6 +15,13 @@ func NewUserRepository(db *gorm.DB) domains.UserRepository {
 	return &userRepository{db: db}
 }
 
+func (r *userRepository) GetAll() ([]domains.User, error) {
+	var users []domains.User
+	err := r.db.Where("deleted_at IS NULL").Find(&users).Error // Mengambil hanya users yang deleted_at = null
+	return users, err
+}
+
+
 func (r *userRepository) Create(user *domains.User) error {
 	if user.DeletedAt != nil {
         return errors.New("user cannot be updated because it is marked as deleted")

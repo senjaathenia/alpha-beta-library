@@ -21,6 +21,7 @@ type UserRepository interface{
 	Delete(id string) error
 	GetByUsername(username string) (*User, error)
 	GetByID(id string) (*User, error) 
+	GetAll() ([]User, error)
 }
 
 type UserUsecase interface{
@@ -30,11 +31,12 @@ type UserUsecase interface{
 	Validate(username, password string) (string, error)
 	GetByUsername(username string) (*User, error)
 	GetByID(id string) (*User, error) 
+	GetAll() ([]User, error)
 }
 type Response struct {
 	Message string      `json:"message"`
 	Data    interface{} `json:"data"`
-    Errors []ErrorDetail `json:"errors,omitempty"`
+    Errors []ErrorDetail `json:"errors"`
 	Code    int         `json:"code"`
 }
 type ErrorDetail struct {
