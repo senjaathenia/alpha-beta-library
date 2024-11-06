@@ -6,18 +6,18 @@ import (
 )
 
 type Book struct {
-	ID             uint      `gorm:"primaryKey" json:"id"`
-	Title          string    `gorm:"unique;not null" json:"title"`
-	AuthorID       uint      `gorm:"not null" json:"author_id"`
-	AuthorName     string    `json:"author_name"`     // Menambahkan field AuthorName
-	PublisherID    uint      `gorm:"not null" json:"publisher_id"`
-	PublisherName  string    `json:"publisher_name"`  // Menambahkan field PublisherName
-	Summary        string    `gorm:"not null" json:"summary"` 
-	Stock          int       `gorm:"not null" json:"stock"`
-	MaxStock       int       `gorm:"not null" json:"max_stock"`
-	CreatedAt      time.Time `gorm:"autoCreateTime" json:"created_at"`
-	UpdatedAt      time.Time `gorm:"autoUpdateTime" json:"updated_at"`
-	DeletedAt      *time.Time `gorm:"index" json:"deleted_at"`
+	ID            uint       `gorm:"primaryKey" json:"id"`
+	Title         string     `gorm:"unique;not null" json:"title"`
+	AuthorID      uint       `gorm:"not null" json:"author_id"`
+	AuthorName    string     `json:"author_name"` // Menambahkan field AuthorName
+	PublisherID   uint       `gorm:"not null" json:"publisher_id"`
+	PublisherName string     `json:"publisher_name"` // Menambahkan field PublisherName
+	Summary       string     `gorm:"not null" json:"summary"`
+	Stock         int        `gorm:"not null" json:"stock"`
+	MaxStock      int        `gorm:"not null" json:"max_stock"`
+	CreatedAt     time.Time  `gorm:"autoCreateTime" json:"created_at"`
+	UpdatedAt     time.Time  `gorm:"autoUpdateTime" json:"updated_at"`
+	DeletedAt     *time.Time `gorm:"index" json:"deleted_at"`
 }
 
 type BookUsecase interface {
@@ -29,7 +29,7 @@ type BookUsecase interface {
 	AuthorExists(ctx context.Context, authorID int) error
 	PublisherExists(ctx context.Context, publisherID int) error
 	CheckTitleExists(ctx context.Context, title string, id uint) error
-	GetAuthorNameByID(ctx context.Context, authorID uint) (string, error) // Mendapatkan nama author berdasarkan ID
+	GetAuthorNameByID(ctx context.Context, authorID uint) (string, error)       // Mendapatkan nama author berdasarkan ID
 	GetPublisherNameByID(ctx context.Context, publisherID uint) (string, error) // Mendapatkan nama publisher berdasarkan ID
 }
 
@@ -42,11 +42,11 @@ type BookRepository interface {
 	AuthorExists(ctx context.Context, authorID int) error
 	PublisherExists(ctx context.Context, publisherID int) error
 	CheckTitleExists(ctx context.Context, title string, id uint) error
-	DecreaseStock(ctx context.Context, id uint) error // Mengurangi stok buku
-	CheckStock(ctx context.Context, id uint) (bool, error) // Memeriksa ketersediaan stok buku
-	GetAuthorNameByID(ctx context.Context, authorID uint) (string, error) // Mendapatkan nama author berdasarkan ID
+	DecreaseStock(ctx context.Context, id uint) error                           // Mengurangi stok buku
+	CheckStock(ctx context.Context, id uint) (bool, error)                      // Memeriksa ketersediaan stok buku
+	GetAuthorNameByID(ctx context.Context, authorID uint) (string, error)       // Mendapatkan nama author berdasarkan ID
 	GetPublisherNameByID(ctx context.Context, publisherID uint) (string, error) // Mendapatkan nama publisher berdasarkan ID
-    GetAuthorByID(ctx context.Context, authorID uint) (Author, error)
-    GetPublisherByID(ctx context.Context, publisherID uint) (Publisher, error)
-
+	GetAuthorByID(ctx context.Context, authorID uint) (Author, error)
+	GetPublisherByID(ctx context.Context, publisherID uint) (Publisher, error)
+	//test
 }
